@@ -1,3 +1,6 @@
+import csv
+
+
 class Contacto:
     def __init__(self, nombre, movil, mail):
         self.nombre = nombre
@@ -12,11 +15,13 @@ class Agenda:
     def agregar_contacto(self, nombre, movil, mail):
         contacto = Contacto(nombre, movil, mail)
         self.__contactos.append(contacto)
+        self.__guardar()
 
     def eliminar_contacto(self, nombre):
         for index, c in enumerate(self.__contactos):
             if c.nombre.lower() == nombre.lower():
                 del self.__contactos[index]
+                self.__guardar()
                 break
 
     def mostrar_agenda(self):
@@ -47,6 +52,14 @@ class Agenda:
         else:
             self.no_encontrado()
 
+    def __guardar(self):
+        with open('contactos.csv', 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(('nombre', 'movil', 'mail'))
+
+            for c in self.__contactos:
+                writer.writerow((c.nombre, c.movil, c.mail))
+
     def __print_contactos(self, c):
         print(f'\nNombre: {c.nombre}\nMovil: {c.movil}\nMail: {c.mail}')
 
@@ -56,10 +69,19 @@ class Agenda:
         mail = str(input('Escribe mail del contacto: '))
         return nombre, movil, mail
 
+    def leer_csv(self):
+        with open('contactos.csv', 'r') as f:
+            leer = csv.reader(f)
+            for index, row in enumerate(leer):
+                if index == 0:
+                    continue
+                self.agregar_contacto(row[0], row[1], row[2])
 
 def run():
 
     agenda = Agenda()
+
+    agenda.leer_csv()
 
     while True:
         tecla_pulsada = str(input('''
@@ -80,7 +102,8 @@ def run():
 
         elif tecla_pulsada == 'ac':
             print('Actualizar contacto')
-            nombre = str(input('Escribe el nombre del contacto para Actualizar: '))
+            nombre = str(
+                input('Escribe el nombre del contacto para Actualizar: '))
             agenda.actualizar_contacto(nombre)
 
         elif tecla_pulsada == 'b':
